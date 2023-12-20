@@ -134,7 +134,24 @@ architecture Behav of core is
     signal memctl_dataReady : bit := '0';
     signal memctl_size : bit_vector(1 downto 0);
     signal memctl_signExtend : bit := '0';
+
+    signal core_clock : bit := '0';
+
+    signal reg_en : bit := '0';
+    signal reg_we : bit := '0';
+
+    signal reg_write_data : DataType := (others => '0');
+    signal data : DataType := (others => '0');
+
+    signal SEL_RS1 : RegAddrType := (others => '0');
+    signal SEL_RS2 : RegAddrType := (others => '0');
+    signal SEL_D : RegAddrType := (others => '0');
+
+    signal op : Optype6 := (others => '0');
+
 begin
+    core_clock <= CLK;
+
     mem_controller_instance : mem_controller port map(
         CLK => CLK,
         RST => RST,
@@ -162,28 +179,14 @@ begin
     );
 
     controller_instance : controller port map(
-        I_clk => core_clock,
-        I_reset => I_reset,
-        I_halt => should_halt,
-        I_aluop => aluop,
-
-        I_int => lint_int,
-        O_int_ack => lint_reset,
-        I_int_enabled => int_enabled,
-        I_int_mem_data => lint_int_data,
-        O_idata => int_idata,
-        O_set_idata => int_set_idata,
-        O_set_ipc => PCintVec,
-        O_set_irpc => int_set_irpc,
-        O_instTick => csru_instRetTick,
-        I_misalignment => misalign_hint,
-        I_ready => memctl_ready,
-        O_execute => memctl_execute,
-        I_dataReady => memctl_dataReady,
-        I_aluWait => alu_wait,
-        I_aluMultiCy => alutobemulticycle,
-        O_state => state
-
+        CLK => core_clock,
+        RST => RST,
+        --D_IN => 
+        OP => op,
+        --D_OUT => 
+        ALU_Wait => ALU_WAIT,
+        ALU_MultiCy => ALU_MULTI_CYCLE,
+        OUT_STATE => state
     );
 
     decoder_instance : decoder port map(
@@ -191,9 +194,18 @@ begin
     );
 
     alu_instance : alu port map(
+        
     );
 
     register_file_instance : register_file port map(
+        CLK => core_clock,
+        ENABLE => reg_en,
+        W_ENABLE => reg_we,
+        D_IN => reg_write_data,
+        SEL_RS1 => SEL_RS1,
+        SEL_RS2 => SEL_RS2,
+        SEL_RD => SEL_RD,
+        Q_OUT => data
     );
 
 end Behav;

@@ -127,6 +127,11 @@ package cpu_defs_pack is
     constant OPCODE_AUIPC: OpType4 := "00101";
     constant OPCODE_LUI: OpType4 := "01101";
 
+    -- Byte, half-word, word modes
+    constant F2_MEM_LS_SIZE_B: bit_vector(1 downto 0) := "00";
+    constant F2_MEM_LS_SIZE_H: bit_vector(1 downto 0) := "01";
+    constant F2_MEM_LS_SIZE_W: bit_vector(1 downto 0) := "10";
+
     -- Flags
     constant F3_LOAD_LB: Func3Type := "000";
     constant F3_LOAD_LH: Func3Type := "001";

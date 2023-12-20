@@ -9,7 +9,6 @@ entity controller is
         CLK : in bit;
         RST : in bit;
 
-        --- command and address in, flags
         D_IN : in DataType;
         OP : out OpType6;
         D_OUT : out DataType;

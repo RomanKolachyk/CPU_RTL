@@ -35,7 +35,7 @@ begin
             b => b_int(0),
             carry_in => neg,
             c => c_int(0),
-            carry_out =>  carry_int(1)
+            carry_out =>  carry_int(0)
         );
 
     adders1to30: for i in 1 to datasize-2 generate
@@ -43,9 +43,9 @@ begin
             port map(
                 a => a_int(i),
                 b => b_int(i),
-                carry_in => carry_int(i),
+                carry_in => carry_int(i-1),
                 c => c_int(i),
-                carry_out => c_int(i+1)
+                carry_out => carry_int(i)
             );
     end generate;
 
@@ -53,9 +53,9 @@ begin
         port map(
             a => a_int(datasize - 1),
             b => b_int(datasize - 1),
-            carry_in => carry_int(datasize - 1),
+            carry_in => carry_int(datasize - 2),
             c => c_int(datasize - 1),
-            carry_out => carry_int(0)
+            carry_out => carry_int(datasize - 1)
         );
 
     c <= c_int;

@@ -142,9 +142,21 @@ begin
                         else
                             O_dataIMM <= X"0000" & "0000" & I_dataInst(7) & I_dataInst(30 downto 25) & I_dataInst(11 downto 8) & '0';
                         end if;
-                        
-                    when OPCODE_MISCMEM =>
-                    when OPCODE_SYSTEM =>
+
+                        when others =>
+                        s_multicy <= '0';
+                        O_memOp <= "00000";
+                        O_regDwe <= '0';
+                        O_dataIMM <= I_dataInst(IMM_I_START downto IMM_S_B_END) & "0000000";
+                end case;
+            elsif I_int_ack = '1' then
+                s_int <= '0';
+            end if;
+        end if;
+    end process;
+
+end Behavioral;
+
 
 
 

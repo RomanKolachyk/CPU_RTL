@@ -6,6 +6,7 @@ use work.cpu_defs_pack.all;
 
 entity alu is   
     port(
+        clk: in bit;
         op: in optype4;
         a: in datatype;
         b: in datatype;
@@ -19,52 +20,58 @@ architecture Behavioral of alu is
 
     signal add_temp, sub_temp, logic_temp, shift_temp, compare_temp : datatype := (others => '0');
 begin
-    addition: entity work.adder(behav)
-        port map(
-            a => a,
-            b => b,
-            c => add_temp,
-            neg => '0'
-        );
-        
-    subtraction: entity work.adder(behav)
-        port map(
-            a =>a,
-            b =>b, 
-            c => sub_temp,
-            neg => '1'
-        );
-        
-    logic: entity work.logic(behav)
-        port map(
-            a => a,
-            b => b,
-            c => logic_temp,
-            op => op,
-            f3 => f3,
-            f7 => f7
-        );
     
-    shifts: entity work.shifters(behav)
-        port map(
-            a => a,
-            b => b,
-            c => shift_temp,
-            op => op,
-            f3 => f3,
-            f7 => f7
-        );
-    
-    compares: entity work.compare(behav)
-        port map(
-            a => a,
-            b => b,
-            c => compare_temp,
-            op => op,
-            f3 => f3,
-            f7 => f7
-        );
+    process (clk)
+    begin
+        if clk'event and clk = '1' then 
         
+            addition: entity work.adder(behav)
+                port map(
+                    a => a,
+                    b => b,
+                    c => add_temp,
+                    neg => '0'
+                );
+                
+            subtraction: entity work.adder(behav)
+                port map(
+                    a =>a,
+                    b =>b, 
+                    c => sub_temp,
+                    neg => '1'
+                );
+                
+            logic: entity work.logic(behav)
+                port map(
+                    a => a,
+                    b => b,
+                    c => logic_temp,
+                    op => op,
+                    f3 => f3,
+                    f7 => f7
+                );
+            
+            shifts: entity work.shifters(behav)
+                port map(
+                    a => a,
+                    b => b,
+                    c => shift_temp,
+                    op => op,
+                    f3 => f3,
+                    f7 => f7
+                );
+            
+            compares: entity work.compare(behav)
+                port map(
+                    a => a,
+                    b => b,
+                    c => compare_temp,
+                    op => op,
+                    f3 => f3,
+                    f7 => f7
+                );
+        end if;
+    end process;            
     
     result <= add_temp when ((op = opcode_op) and (f3 = f3_op_add) and (f7 = f7_op_add)) or ((op = opcode_opimm) and (f3 = f3_opimm_addi)) else
         sub_temp when ((op = opcode_op) and (f3 = f3_op_sub) and (f7 = f7_op_sub)) else

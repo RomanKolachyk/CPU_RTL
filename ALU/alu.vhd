@@ -19,7 +19,7 @@ architecture Behavioral of alu is
 
     signal add_temp, sub_temp, logic_temp, shift_temp, compare_temp : datatype := (others => '0');
 begin
-    addition: entity work.adder_vl(behav)
+    addition: entity work.adder(behav)
         port map(
             a => a,
             b => b,
@@ -27,7 +27,7 @@ begin
             neg => '0'
         );
         
-    subtraction: entity work.adder_vl(behav)
+    subtraction: entity work.adder(behav)
         port map(
             a =>a,
             b =>b, 

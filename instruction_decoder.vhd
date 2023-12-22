@@ -36,7 +36,7 @@ begin
     process (I_CLK, I_EN)
     begin
         
-        if rising_edge(I_CLK) then
+        if CLK = '1' and CLK'event then
             if I_EN = '1' then
 
                 O_SELD <= I_DATAINST(RD_START downto RD_END);

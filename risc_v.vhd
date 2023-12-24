@@ -28,7 +28,7 @@ entity core is
         
         ALU_Wait : in bit;
         ALU_MultiCy : in bit;
-        OUT_STATE : out bit_vector(6 downto 0));
+        OUT_STATE : out bit_vector(6 downto 0)
     );
 end core;
 
@@ -36,7 +36,10 @@ architecture Behav of core is
     -- TODO PC_UNIT
     component pc_unit
         port (
-
+            I_clk : in  bit;
+            I_nPC : in  DataType;
+            I_nPCop : in PcuOpType;
+            O_PC : out DataType
         );
     end component;
 
@@ -55,9 +58,20 @@ architecture Behav of core is
             );
     end component;
 
-    component decoder
+    component ID
         port (
-
+            I_CLK : in bit;
+            I_EN : in bit;
+            I_DATAINST : in InstrType;    -- Instruction to be decoded
+            O_SELRS1 : out RegAddrType;   -- Selection out for regrs1
+            O_SELRS2 : out RegAddrType    -- Selection out for regrs2
+            O_SELD : out RegAddrType;     -- Selection out for regD
+            O_DATAIMM : out DataType;     -- Immediate value out
+            O_REGDWE : out bit;                        -- RegD wrtite enable
+            O_ALUOP : out OpType6;        -- ALU opcode
+            O_ALUFUNC : out FuncType;    -- ALU function
+            O_MEMOP : out bit_vector(4 downto 0);      -- Memory operation 
+            O_MULTYCYALU : out bit;                    -- is this a multi-cycle alu op?    
         );
     end component;
 
@@ -81,7 +95,7 @@ architecture Behav of core is
             SEL_RS1: in RegAddrType;
             SEL_RS2: in RegAddrType;
             SEL_RD: in RegAddrType;
-            Q_OUT: out DataType);
+            Q_OUT: out DataType
             );
     end component;
 
@@ -111,6 +125,7 @@ architecture Behav of core is
     signal state: bit_vector(6 downto 0) := (others => '0');
     signal pcop: bit_vector(1 downto 0);
     signal in_pc: AddrType;
+    signal PC : AddrType := (others => '0');
 
     signal aluFunc: bit_vector(15 downto 0);
     signal memOp: OpType4;
@@ -175,7 +190,10 @@ begin
     );
 
     pc_unit_instance : pc_unit port map(
-
+        I_clk => core_clock, 
+        I_nPC => in_pc,
+        I_nPCop => pcop,
+        O_PC => PC
     );
 
     controller_instance : controller port map(
@@ -189,8 +207,9 @@ begin
         OUT_STATE => state
     );
 
-    decoder_instance : decoder port map(
+    decoder_instance : ID port map(
 
+    
     );
 
     alu_instance : alu port map(

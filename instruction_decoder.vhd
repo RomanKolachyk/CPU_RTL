@@ -21,7 +21,7 @@ entity ID is
         O_ALUOP : out OpType6;        -- ALU opcode
         O_ALUFUNC : out FuncType;    -- ALU function
         O_MEMOP : out bit_vector(4 downto 0);      -- Memory operation 
-        O_MULTYCYALU : out bit;                    -- is this a multi-cycle alu op?
+        O_MULTYCYALU : out bit                    -- is this a multi-cycle alu op?
     );
 end ID;
 

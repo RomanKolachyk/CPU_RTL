@@ -95,7 +95,8 @@ architecture Behav of core is
             SEL_RS1: in RegAddrType;
             SEL_RS2: in RegAddrType;
             SEL_RD: in RegAddrType;
-            Q_OUT: out DataType
+            Q_OUT_A: out DataType;
+            Q_OUT_B: out DataType);
             );
     end component;
 
@@ -156,14 +157,17 @@ architecture Behav of core is
     signal reg_we : bit := '0';
 
     signal reg_write_data : DataType := (others => '0');
-    signal data : DataType := (others => '0');
+    signal dataA : DataType := (others => '0');
+    signal dataB : DataType := (others => '0');
 
     signal SEL_RS1 : RegAddrType := (others => '0');
     signal SEL_RS2 : RegAddrType := (others => '0');
     signal SEL_D : RegAddrType := (others => '0');
 
     signal op : Optype6 := (others => '0');
+    signal aluFunc : bit_vector(15 downto 0); -- all funcs
 
+    signal alu_output: DataType := (others => '0');
 begin
     core_clock <= CLK;
 
@@ -213,7 +217,12 @@ begin
     );
 
     alu_instance : alu port map(
-        
+        op => aluop(6 downto 2),
+        a => dataA,
+        b => dataB,
+        result => alu_output,
+        f3 => aluFunc(2 downto 0),
+        f7 => aluFunc(9 downto 3)
     );
 
     register_file_instance : register_file port map(
@@ -224,7 +233,8 @@ begin
         SEL_RS1 => SEL_RS1,
         SEL_RS2 => SEL_RS2,
         SEL_RD => SEL_RD,
-        Q_OUT => data
+        Q_OUT_A => dataA,
+        Q_OUT_B => dataB
     );
 
 end Behav;

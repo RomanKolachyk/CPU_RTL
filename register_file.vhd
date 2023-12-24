@@ -14,7 +14,8 @@ entity register_file is
         SEL_RS1: in RegAddrType;
         SEL_RS2: in RegAddrType;
         SEL_RD: in RegAddrType;
-        Q_OUT: out DataType);
+        Q_OUT_A: out DataType;
+        Q_OUT_B: out DataType);
 end register_file;
 
 -- 32 bit register with Reset and Enable 
@@ -47,13 +48,16 @@ architecture Behav of register_file is
 
 begin
     signal regs: RegType := (others => X"00000000");
-    signal dataOut: DataType := (others => '0');
+    signal dataAOut: DataType := (others => '0');
+    signal dataBOut: DataType := (others => '0');
+
     -- signal
     process(CLK)
     begin
         if CLK = '1' and CLK'event then 
             if ENABLE = '1' then
-                dataOut <= regs(bit_vector2natural(SEL_RS1));
+                dataAOut <= regs(bit_vector2natural(SEL_RS1));
+                dataBOut <= regs(bit_vector2natural(SEL_RS2));
                 if W_ENABLE = '1' then
                     regs(bit_vector2natural(SEL_RD)) <= D_IN;
                 end if;
@@ -61,5 +65,7 @@ begin
         end if;
     end process;
 
-    Q_OUT <= dataOut when SEL_RS1 /= "00000" else X"00000000";
-end Behav;
+    Q_OUT_A <= dataAOut when SEL_RS1 /= "00000" else X"00000000";
+    Q_OUT_B <= dataBOut when SEL_RS2 /= "00000" else X"00000000";
+
+    end Behav;

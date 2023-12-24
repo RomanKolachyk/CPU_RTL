@@ -14,7 +14,7 @@ entity ID is
         I_EN : in bit;
         I_DATAINST : in InstrType;    -- Instruction to be decoded
         O_SELRS1 : out RegAddrType;   -- Selection out for regrs1
-        O_SELRS2 : out RegAddrType    -- Selection out for regrs2
+        O_SELRS2 : out RegAddrType;    -- Selection out for regrs2
         O_SELD : out RegAddrType;     -- Selection out for regD
         O_DATAIMM : out DataType;     -- Immediate value out
         O_REGDWE : out bit;                        -- RegD wrtite enable
@@ -26,6 +26,8 @@ entity ID is
 end ID;
 
 architecture Behavioral of ID is
+    signal s_multicy : bit := '0';
+
 begin
     O_MULTYCYALU <= S_MULTICY;
 
@@ -36,7 +38,7 @@ begin
     process (I_CLK, I_EN)
     begin
         
-        if CLK = '1' and CLK'event then
+        if I_CLK = '1' and I_CLK'event then
             if I_EN = '1' then
 
                 O_SELD <= I_DATAINST(RD_START downto RD_END);
@@ -104,7 +106,7 @@ begin
                     else
                         s_multicy <= '0';
                     end if;
-                    s_int <= '0';
+                    -- s_int <= '0';
                     O_regDwe <= '1';
 
                     when OPCODE_LOAD =>
@@ -149,8 +151,8 @@ begin
                         O_regDwe <= '0';
                         O_dataIMM <= I_dataInst(IMM_I_START downto IMM_S_B_END) & "0000000";
                 end case;
-            elsif I_int_ack = '1' then
-                s_int <= '0';
+            -- elsif I_int_ack = '1' then
+                -- s_int <= '0';
             end if;
         end if;
     end process;

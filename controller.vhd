@@ -10,7 +10,7 @@ entity controller is
         RST : in bit;
 
         --D_IN : in DataType;
-        OP : out OpType6;
+        OP : in OpType6;
         --D_OUT : out DataType;
 
         ALU_Wait : in bit;
@@ -19,7 +19,6 @@ entity controller is
 end controller;
 
 architecture Behav of controller is
-begin
     signal state: bit_vector(6 downto 0) := "0000001";
     signal s_state : bit_vector(6 downto 0) := "0000001";
 
@@ -28,7 +27,8 @@ begin
     signal mem_dataReady : bit;
 
     signal mem_cycles : integer := 0;
-    signal has_waited : bit = '0';
+    signal has_waited : bit := '0';
+begin
     process(CLK)
     begin
         if CLK = '1' and CLK'event then
@@ -55,7 +55,7 @@ begin
                         end if;
                 -- Instruction Decode
                     when "0000010" =>
-                        has_waited = '0';
+                        has_waited <= '0';
                         state <= "0000100"; -- Instruction Execute
                 -- Instruction Execute
                     when "0000100" =>

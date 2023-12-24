@@ -11,8 +11,15 @@ package bit_vector_natural_pack is
     function bit_vector2natural(constant A: bit_vector)
         return integer;
     
+    function bit_vector2integer(constant A: bit_vector)
+        return integer;
+        
     function natural2bit_vector(constant A :integer;
      constant data_width : natural)
+        return bit_vector;
+
+    function integer2bit_vector(constant A :integer;
+    constant data_width : natural)
         return bit_vector;
     
     function zero_extend(constant imm: Imm12Type) return bit_vector;
@@ -33,12 +40,25 @@ package body bit_vector_natural_pack is
             return to_integer(unsigned(A));
     end bit_vector2natural;
 
+    function bit_vector2integer(constant A: bit_vector)
+        return integer is
+        begin
+            return to_integer(signed(A));
+    end bit_vector2integer;
+
     function natural2bit_vector(constant A :integer;
     constant data_width : natural)
         return bit_vector is
         begin
             return bit_vector(to_unsigned(A, data_width));
     end natural2bit_vector;
+
+    function integer2bit_vector(constant A :integer;
+    constant data_width : natural)
+        return bit_vector is
+        begin
+            return bit_vector(to_signed(A, data_width));
+    end integer2bit_vector;
 
      function zero_extend(constant imm: Imm12Type) return bit_vector is
          variable i: bit_vector (31 downto 0);

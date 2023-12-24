@@ -19,38 +19,12 @@ entity register_file is
 end register_file;
 
 -- 32 bit register with Reset and Enable 
-entity REG_G is
-    generic( N : natural );
-    port(
-        D_IN : in bit_vector( 31 downto 0 );
-        RST : in bit;
-        ENABLE: in bit;
-        CLK : in bit;
-        Q_OUT : out bit_vector( 31 downto 0 ));
-end REG_G;
-    
-
-architecture RTL_REG_G of REG_G is
-begin
-    process (CLK)
-    begin
-        if CLK = '1' and CLK'event then
-            if RST = '1' then
-                Q_OUT <= (others => '0');
-            elsif ENABLE = '1‘ then
-                Q_OUT <= D_IN;
-            end if;
-        end if;
-    end process;
-end RTL_REG_G;
 
 architecture Behav of register_file is
-
-begin
     signal regs: RegType := (others => X"00000000");
     signal dataAOut: DataType := (others => '0');
     signal dataBOut: DataType := (others => '0');
-
+begin
     -- signal
     process(CLK)
     begin

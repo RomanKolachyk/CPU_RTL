@@ -14,6 +14,7 @@ entity mem_controller is
         W_ENABLE : in bit;
         ADDR : in AddrType;
         IN_DATA : in DataType;
+        I_dataByteEn : in bit_vector(1 downto 0);
         SIGN_EXTEND : in bit;
         OUT_DATA : out DataType;
         OUT_DATA_READY : out bit;
@@ -21,7 +22,7 @@ entity mem_controller is
         MEM_I_ready : in bit;
         MEM_O_cmd : out bit;
         MEM_O_we : out bit;
-        MEM_O_byteEnable : bit_vector (1 downto 0);
+        MEM_O_byteEnable : out bit_vector (1 downto 0);
         MEM_O_addr : out DataType;
         MEM_O_data : out DataType;
         MEM_I_data : in DataType;
@@ -31,7 +32,7 @@ end mem_controller;
 
 architecture Behav of mem_controller is
     signal we : bit := '0';
-    signal addr : DataType := X"00000000";
+    signal s_addr : DataType := X"00000000";
     signal indata : DataType := X"00000000";
     signal outdata : DataType := X"00000000";
 
@@ -48,11 +49,11 @@ begin
             if RST = '1' then
             we <= '0';
             cmd <= '0';
-            state <= '0';
+            state <= 0;
             OUT_DATA_READY <= '0';
             elsif state = 0 and EXECUTE = '1' and MEM_I_ready = '1' then
                 we <= W_ENABLE;
-                addr <= ADDR;
+                s_addr <= ADDR;
                 indata <= IN_DATA;
                 byteEnable <= I_dataByteEn;
                 cmd <= '1';
@@ -91,12 +92,12 @@ begin
         end if;
     end process;
     OUT_DATA <= outdata;
-    OUT_READY <= (MEM_I_ready and not I_execute) when state = 0 else '0';
+    OUT_READY <= (MEM_I_ready and not execute) when state = 0 else '0';
     
     MEM_O_cmd <= cmd;
     MEM_O_byteEnable <= byteEnable;
     MEM_O_data <= indata;
-    MEM_O_addr <= addr;
+    MEM_O_addr <= s_addr;
     MEM_O_we <= we;
 
 end Behav;

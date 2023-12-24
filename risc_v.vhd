@@ -23,12 +23,12 @@ entity core is
         MEM_O_addr : out DataType;
         MEM_O_data : out DataType;
         MEM_I_data : in DataType;
-        MEM_I_dataReady : in bit;
+        MEM_I_dataReady : in bit
 
         
-        ALU_Wait : in bit;
-        ALU_MultiCy : in bit;
-        OUT_STATE : out bit_vector(6 downto 0)
+        -- ALU_Wait : in bit;
+        -- ALU_MultiCy : in bit;
+        -- OUT_STATE : out bit_vector(6 downto 0)
     );
 end core;
 
@@ -39,8 +39,7 @@ architecture Behav of core is
             I_clk : in  bit;
             I_nPC : in  DataType;
             I_nPCop : in PcuOpType;
-            O_PC : out DataType
-        );
+            O_PC : out DataType);
     end component;
 
     component controller
@@ -48,14 +47,11 @@ architecture Behav of core is
             CLK : in bit;
             RST : in bit;
     
-            D_IN : in DataType;
-            OP : out OpType6;
-            D_OUT : out DataType;
+            OP : in OpType6;
     
             ALU_Wait : in bit;
             ALU_MultiCy : in bit;
-            OUT_STATE : out bit_vector(6 downto 0)
-            );
+            OUT_STATE : out bit_vector(6 downto 0));
     end component;
 
     component ID
@@ -64,26 +60,34 @@ architecture Behav of core is
             I_EN : in bit;
             I_DATAINST : in InstrType;    -- Instruction to be decoded
             O_SELRS1 : out RegAddrType;   -- Selection out for regrs1
-            O_SELRS2 : out RegAddrType    -- Selection out for regrs2
+            O_SELRS2 : out RegAddrType;    -- Selection out for regrs2
             O_SELD : out RegAddrType;     -- Selection out for regD
             O_DATAIMM : out DataType;     -- Immediate value out
             O_REGDWE : out bit;                        -- RegD wrtite enable
             O_ALUOP : out OpType6;        -- ALU opcode
             O_ALUFUNC : out FuncType;    -- ALU function
             O_MEMOP : out bit_vector(4 downto 0);      -- Memory operation 
-            O_MULTYCYALU : out bit;                    -- is this a multi-cycle alu op?    
+            O_MULTYCYALU : out bit                    -- is this a multi-cycle alu op?    
         );
     end component;
 
     component alu is
-        port (
-            op: in optype4;
-            a: in datatype;
-            b: in datatype;
-            result: out datatype;
-            f3: in func3type;
-            f7: in func7type    
-        );
+        port (        
+        I_clk : in bit;
+        I_en : in bit;
+        I_dataA : in DataType;
+        I_dataB : in DataType;
+        I_dataDwe : in bit;
+        I_aluop : in bit_vector (4 downto 0);
+        I_aluFunc : in bit_vector (15 downto 0);
+        I_PC : in DataType;
+        I_dataIMM : in DataType;
+        O_dataResult : out DataType;
+        O_branchTarget : out DataType;
+        O_dataWriteReg : out bit;
+        O_lastPC : out DataType;
+        O_shouldBranch : out bit;
+        O_wait : out bit);
     end component;
 
     component register_file
@@ -97,7 +101,6 @@ architecture Behav of core is
             SEL_RD: in RegAddrType;
             Q_OUT_A: out DataType;
             Q_OUT_B: out DataType);
-            );
     end component;
 
     component mem_controller
@@ -109,6 +112,7 @@ architecture Behav of core is
             W_ENABLE : in bit;
             ADDR : in AddrType;
             IN_DATA : in DataType;
+            I_dataByteEn : in bit_vector(1 downto 0);
             SIGN_EXTEND : in bit;
             OUT_DATA : out DataType;
             OUT_DATA_READY : out bit;
@@ -116,7 +120,7 @@ architecture Behav of core is
             MEM_I_ready : in bit;
             MEM_O_cmd : out bit;
             MEM_O_we : out bit;
-            MEM_O_byteEnable : bit_vector (1 downto 0);
+            MEM_O_byteEnable : out bit_vector (1 downto 0);
             MEM_O_addr : out DataType;
             MEM_O_data : out DataType;
             MEM_I_data : in DataType;
@@ -134,7 +138,7 @@ architecture Behav of core is
     signal instruction: DataType := (others => '0');
     signal data: DataType := (others => '0');
     signal dataDwe: bit := '0';
-    signal Op: Optype6 := (others => '0');
+    signal aluOp: Optype6 := (others => '0');
     signal dataIMM : DataType := (others => '0');
     signal SEL_RS1 : RegAddrType := (others => '0');
     signal SEL_RS2 : RegAddrType := (others => '0');
@@ -155,17 +159,21 @@ architecture Behav of core is
 
     signal reg_en : bit := '0';
     signal reg_we : bit := '0';
+    signal en_alu : bit := '0';
+    signal en_decode : bit := '0';
+
+    signal dataResult : DataType := (others => '0');
+    signal dataWriteReg : bit := '0';
+    signal lastPC_alu : DataType := (others => '0');
+    signal shouldBranch : bit := '0';
+    signal alutobemulticycle : bit := '0';
+
 
     signal reg_write_data : DataType := (others => '0');
     signal dataA : DataType := (others => '0');
     signal dataB : DataType := (others => '0');
 
-    signal SEL_RS1 : RegAddrType := (others => '0');
-    signal SEL_RS2 : RegAddrType := (others => '0');
-    signal SEL_D : RegAddrType := (others => '0');
-
-    signal op : Optype6 := (others => '0');
-    signal aluFunc : bit_vector(15 downto 0); -- all funcs
+    signal alu_wait : bit := '0';
 
     signal alu_output: DataType := (others => '0');
 begin
@@ -176,12 +184,13 @@ begin
         RST => RST,
         OUT_READY => memctl_ready,
         EXECUTE => memctl_execute,
-        W_ENABLE => memctl_dataWe
+        W_ENABLE => memctl_dataWe,
         ADDR => memctl_address,
         IN_DATA => memctl_in_data,
+        I_dataByteEn => memctl_dataByteEn,
         SIGN_EXTEND => memctl_signExtend,
         OUT_DATA => memctl_out_data,
-        OUT_DATA_READY => memctl_dataReady
+        OUT_DATA_READY => memctl_dataReady,
 
         MEM_I_ready => MEM_I_ready, 
         MEM_O_cmd => MEM_O_cmd,
@@ -203,26 +212,44 @@ begin
     controller_instance : controller port map(
         CLK => core_clock,
         RST => RST,
-        --D_IN => 
-        OP => op,
-        --D_OUT => 
+        OP => aluop,
         ALU_Wait => ALU_WAIT,
-        ALU_MultiCy => ALU_MULTI_CYCLE,
+        ALU_MultiCy => alutobemulticycle,
         OUT_STATE => state
     );
 
     decoder_instance : ID port map(
-
-    
+        I_CLK => core_clock,
+        I_EN => en_decode,
+        I_DATAINST => instruction,
+        O_SELRS1 => SEL_RS1,
+        O_SELRS2 => SEL_RS2,
+        O_SELD => SEL_D,
+        O_DATAIMM => dataIMM,
+        O_REGDWE => dataDwe,
+        O_ALUOP => aluop,
+        O_ALUFUNC => alufunc,
+        O_MEMOP  => memop,
+        O_MULTYCYALU => alutobemulticycle
     );
 
     alu_instance : alu port map(
-        op => aluop(6 downto 2),
-        a => dataA,
-        b => dataB,
-        result => alu_output,
-        f3 => aluFunc(2 downto 0),
-        f7 => aluFunc(9 downto 3)
+        I_clk => core_clock,
+        I_en => en_alu,
+        I_dataA => dataA,
+        I_dataB => dataB,
+        I_dataDwe => dataDwe,
+        I_aluop => aluop(6 downto 2),
+        I_aluFunc => alufunc,
+        I_PC => pc,
+        I_dataIMM => dataImm,
+        -- I_clear => misalign_int,
+        O_dataResult => dataResult,
+        O_branchTarget => branchTarget,
+        O_dataWriteReg => dataWriteReg,
+        O_lastPC => lastPC_alu,
+        O_shouldBranch => shouldBranch,
+        O_wait => alu_wait
     );
 
     register_file_instance : register_file port map(
@@ -232,7 +259,7 @@ begin
         D_IN => reg_write_data,
         SEL_RS1 => SEL_RS1,
         SEL_RS2 => SEL_RS2,
-        SEL_RD => SEL_RD,
+        SEL_RD => SEL_D,
         Q_OUT_A => dataA,
         Q_OUT_B => dataB
     );

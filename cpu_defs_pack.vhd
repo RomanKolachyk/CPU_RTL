@@ -10,7 +10,7 @@ package cpu_defs_pack is
     
 
     -- PC, addr wire of bus, memory depth
-    constant AddrSize : integer := 16;
+    constant AddrSize : integer := 32;
 
     -- (maximum) instruction size
     constant InstrSize : integer := 32; 
@@ -47,6 +47,9 @@ package cpu_defs_pack is
     constant RS2_START: integer := 24;
     constant RS2_END: integer := 20;
 
+    constant FUNCT7_START: integer := 31;
+    constant FUNCT7_END: integer := 25;
+
     constant FUNCT7_R_START: integer := 31;
     constant FUNCT7_R_END: integer := 25;
 
@@ -68,7 +71,12 @@ package cpu_defs_pack is
     constant IMM_J_B_START: integer := 19;
     constant IMM_J_B_END: integer := 12;
 
-    
+    constant R1_START: integer := 19;
+    constant R1_END: integer := 15;
+
+    constant R2_START: integer := 24;
+    constant R2_END: integer := 20;
+
 
     -- subtypes
     subtype AddrType is bit_vector (AddrSize-1 downto 0);
@@ -165,6 +173,8 @@ package cpu_defs_pack is
     constant F7_OPIMM_SRLI: Func7Type := "0000000";
     constant F3_OPIMM_SRAI: Func3Type := "101";
     constant F7_OPIMM_SRAI: Func7Type := "0100000";
+
+    constant F7_OP_M_EXT: bit_vector(6 downto 0) := "0000001";
 
     constant F3_OP_ADD: Func3Type := "000";
     constant F7_OP_ADD: Func7Type := "0000000";

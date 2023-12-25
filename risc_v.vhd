@@ -24,11 +24,6 @@ entity core is
         MEM_O_data : out DataType;
         MEM_I_data : in DataType;
         MEM_I_dataReady : in bit
-
-        
-        -- ALU_Wait : in bit;
-        -- ALU_MultiCy : in bit;
-        -- OUT_STATE : out bit_vector(6 downto 0)
     );
 end core;
 

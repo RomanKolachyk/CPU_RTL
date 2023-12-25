@@ -27,7 +27,7 @@ package cpu_defs_pack is
     -- assuming BusDatasize == RegDataSize
     constant DataSize : integer := 32; 
 
-    constant ADDR_RESET: bit_vector(AddrSize-1 downto 0) :=  X"0000";
+    constant ADDR_RESET: bit_vector(AddrSize-1 downto 0) :=  X"00000000";
 
 
     -- Instruction for Layout Types

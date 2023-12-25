@@ -8,12 +8,13 @@ use work.cpu_defs_pack.all;
 
 package bit_vector_natural_pack is
 
+
     function bit_vector2natural(constant A: bit_vector)
         return integer;
     
     function bit_vector2integer(constant A: bit_vector)
         return integer;
-        
+
     function natural2bit_vector(constant A :integer;
      constant data_width : natural)
         return bit_vector;
@@ -29,10 +30,43 @@ package bit_vector_natural_pack is
     function zero_extend16(constant imm: Imm16Type) return bit_vector;
     function sign_extend16(constant imm: Imm16Type) return bit_vector;    
     function sign_extend20(constant imm: Imm20Type) return bit_vector;    
+    
+    procedure EXEC_SLL (
+        constant A : in DataType;
+        variable R : out DataType);
+
+    procedure EXEC_SRL (
+        constant A : in DataType;
+        variable R : out DataType); 
+
+    procedure EXEC_SRA (
+        constant A : in DataType;
+        variable R : out DataType);
 
 end bit_vector_natural_pack;
     
 package body bit_vector_natural_pack is
+
+    procedure EXEC_SLL (
+            constant A : in DataType;
+            variable R : out DataType) is
+        begin
+            R := A(A'left-1 downto 0) & '0';
+        end EXEC_SLL;
+
+    procedure EXEC_SRL (
+            constant A : in DataType;
+            variable R : out DataType) is
+        begin
+            R := '0' & A(A'left downto 1);        
+        end EXEC_SRL;
+
+    procedure EXEC_SRA (
+            constant A : in DataType;
+            variable R : out DataType) is
+        begin
+            R := A(A'left) & A(A'left downto 1);
+        end EXEC_SRA;
 
     function bit_vector2natural(constant A: bit_vector)
         return integer is

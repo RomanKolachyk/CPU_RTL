@@ -132,7 +132,7 @@ begin
                                     s_result(31 downto 0) <= I_dataA and I_dataB;
 
                                 when F7_OP_SLL & F3_OP_SLL =>
-                                    s_result(31 downto 0) <= I_dataA(31 - bit_vector2natural(I_dataB(4 downto 0)) downto 0) & '0';
+                                    s_result(31 downto 0) <= I_dataA(31 - bit_vector2natural(I_dataB(4 downto 0))) & '0';
 --s_result(31 downto 0) <= X"DEADBEEF";
                                 when F7_OP_SRL & F3_OP_SRL =>
                                     s_result(31 downto 0) <= bit_vector(bit_vector2natural(unsigned(I_dataB(4 downto 0)) downto 0)) & I_dataA;

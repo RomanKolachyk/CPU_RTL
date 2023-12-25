@@ -93,7 +93,7 @@ begin
 --s_result(31 downto 0) <= X"DEADBEEF";
                                     when F7_OPIMM_SRAI =>
                                         s_result(31 downto 0) <= bit_vector(bit_vector2natural(signed(I_dataIMM(4 downto 0)) downto 0)) & I_dataA;
-s_result(31 downto 0) <= X"DEADBEEF";
+--s_result(31 downto 0) <= X"DEADBEEF";
                                     when others =>
                                 end case;
                             when others =>

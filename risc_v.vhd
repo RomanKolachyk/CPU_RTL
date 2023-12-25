@@ -10,9 +10,9 @@ entity core is
         CLK : in bit;
         RST : in bit;
 
-        D_IN : in DataType;
+--        D_IN : in DataType;
         OP : out OpType6;
-        D_OUT : out DataType;
+--        D_OUT : out DataType;
 
         -- memory interface
         MEM_I_ready : in bit;

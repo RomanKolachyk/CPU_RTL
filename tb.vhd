@@ -107,7 +107,7 @@ architecture Behav of core_tb is
     signal ROM3: rom_type :=(others => X"00000000");     
     signal ROM: rom_type:=(  
         -- X"00000097",     --auipc	ra,0x0
-          X"14408093",     --addi    ra,ra,324 # 10000230 <_trap_handler>
+          X"14408093",     --addi    ra,ra,324 # 10000230 <_trap_handler>0011
           X"00002197",     --auipc    gp,0x2
           X"f0818193",     --addi    gp,gp,-248 # 10002000 <test_A1_data>
           X"00002117",     --auipc    sp,0x2
@@ -297,7 +297,6 @@ begin
                         MEM_readyState <= SOC_CtlState_IMM_WriteCmdComplete;
                         if (MEM_CS_BRAM_1 = '1') then
                             ROM(bit_vector2natural( MEM_64KB_ADDR(15 downto 2))) <= MEM_O_data;
-                            report integer'image(bit_vector2natural( MEM_64KB_ADDR(15 downto 2)));
                         end if;
                         if (MEM_CS_BRAM_2 = '1') then
                             ROM2(bit_vector2natural( MEM_64KB_ADDR(15 downto 2))) <= MEM_O_data;

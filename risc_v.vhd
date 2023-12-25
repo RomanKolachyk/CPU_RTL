@@ -156,6 +156,9 @@ architecture Behav of core is
     signal reg_we : bit := '0';
     signal en_alu : bit := '0';
     signal en_decode : bit := '0';
+    signal en_memory : bit := '0';
+    signal en_fetch : bit := '0';
+    signal en_regwrite : bit := '0';
 
     signal dataResult : DataType := (others => '0');
     signal dataWriteReg : bit := '0';
@@ -171,6 +174,13 @@ architecture Behav of core is
     signal alu_wait : bit := '0';
 
     signal alu_output: DataType := (others => '0');
+
+    signal lastPC_dec : DataType := (others => '0');
+    signal nextPC_stall : DataType := (others => '0');
+    signal ram_req_size : bit := '0';
+    signal memMode : bit := '0';
+    signal registerWriteData : DataType := (others => '0');
+
 begin
     core_clock <= CLK;
 
@@ -259,4 +269,49 @@ begin
         Q_OUT_B => dataB
     );
 
+    state_latcher : process (core_clock)
+    begin
+        if core_clock = '1' and core_clock'event then
+            if en_decode = '1' then
+                lastPC_dec <= PC;
+            end if;
+            if state(0) = '1' then
+                instruction <= memctl_out_data;
+            end if;
+        end if;
+    end process;
+
+    -- Register file controls
+    reg_en <= en_decode or en_regwrite;
+    reg_we <= dataWriteReg and en_regwrite;-- and not misalign_mem_hint;
+
+    -- These are the pipeline stage enable bits
+    en_fetch <= state(0);
+    en_decode <= state(1);
+    en_alu <= state(2);
+    -- en_csru <= state(3) when (aluop(6 downto 2) = OPCODE_SYSTEM and aluFunc(2 downto 0) /= "000") else '0';
+    en_memory <= state(3);
+    en_regwrite <= state(4);
+    -- en_stall <= state(6);
+
+    -- This decides what the next PC should be
+    pcop <= PCU_OP_INC when RST = '1' else
+        PCU_OP_INC when shouldBranch = '1' and state(4) = '1' else
+        PCU_OP_INC when shouldBranch = '0' and state(4) = '1' else
+        -- PCU_OP_ASSIGN when PCintvec = '1' else
+        PCU_OP_INC;
+
+    -- Below statements are for memory interface use.
+    memctl_address <= dataResult when en_memory = '1' else PC;
+    ram_req_size <= memMode when en_memory = '1' else '0';
+    memctl_dataByteEn <= memctl_size when en_memory = '1' else F2_MEM_LS_SIZE_W;
+    memctl_in_data <= dataB;
+    memctl_dataWe <= '1' when en_memory = '1' and memOp(4 downto 3) = "11" else '0';
+    memctl_size <= memOp(1 downto 0);
+    memctl_signExtend <= not memOp(2);
+
+    -- This chooses to write registers with memory data or ALU/csr data
+    registerWriteData <= memctl_out_data when memOp(4 downto 3) = "10" else dataB when (aluop(6 downto 2) = OPCODE_STORE) else dataResult;
+
+    
 end Behav;

@@ -84,15 +84,19 @@ begin
                                 end if;
 
                             when F3_OPIMM_SLLI =>
-                                s_result(31 downto 0) <= I_dataA(31 - bit_vector2natural(I_dataIMM(4 downto 0)) downto 0) & '0';
+                            s_result(31 downto 0) <= EXEC_SLL(I_dataA, bit_vector2natural(I_dataIMM(4 downto 0)));
+
+                            -- s_result(31 downto 0) <= I_dataA(31 - bit_vector2natural(I_dataIMM(4 downto 0)) downto 0) & '0';
 --                                s_result(31 downto 0) <= X"DEADBEEF";
                             when F3_OPIMM_SRLI =>
                                 case I_aluFunc(9 downto 3) is
                                     when F7_OPIMM_SRLI =>
-                                        s_result(31 downto 0) <= '0' & I_dataA(31 downto bit_vector2natural(unsigned(I_dataIMM(4 downto 0))));
+                                    s_result(31 downto 0) <= EXEC_SRL(I_dataA, bit_vector2natural(I_dataIMM(4 downto 0)));   
+                                    -- s_result(31 downto 0) <= '0' & I_dataA(31 downto bit_vector2natural(unsigned(I_dataIMM(4 downto 0))));
 --s_result(31 downto 0) <= X"DEADBEEF";
                                     when F7_OPIMM_SRAI =>
-                                        s_result(31 downto 0) <= '0' & I_dataA(31 downto bit_vector2natural(signed(I_dataIMM(4 downto 0))));
+                                    s_result(31 downto 0) <= EXEC_SRA(I_dataA, bit_vector2natural(I_dataIMM(4 downto 0)));   
+                                        -- s_result(31 downto 0) <= '0' & I_dataA(31 downto bit_vector2natural(signed(I_dataIMM(4 downto 0))));
 --s_result(31 downto 0) <= X"DEADBEEF";
                                     when others =>
                                 end case;
@@ -132,13 +136,17 @@ begin
                                     s_result(31 downto 0) <= I_dataA and I_dataB;
 
                                 when F7_OP_SLL & F3_OP_SLL =>
-                                    s_result(31 downto 0) <= I_dataA(31 - bit_vector2natural(I_dataB(4 downto 0)) downto 0) & '0';
+                                    -- s_result(31 downto 0) <= I_dataA(31 - bit_vector2natural(I_dataB(4 downto 0)) downto 0) & '0';
+                                    s_result(31 downto 0) <= EXEC_SLL(I_dataA, bit_vector2natural(I_dataB(4 downto 0)));
 --s_result(31 downto 0) <= X"DEADBEEF";
                                 when F7_OP_SRL & F3_OP_SRL =>
-                                    s_result(31 downto 0) <= '0' & I_dataA(31 downto bit_vector2natural(unsigned(I_dataB(4 downto 0))));
+                                    s_result(31 downto 0) <= EXEC_SRL(I_dataA, bit_vector2natural(I_dataB(4 downto 0)));
+                                -- s_result(31 downto 0) <= '0' & I_dataA(31 downto bit_vector2natural(unsigned(I_dataB(4 downto 0))));
 --s_result(31 downto 0) <= X"DEADBEEF";
                                 when F7_OP_SRA & F3_OP_SRA =>
-                                    s_result(31 downto 0) <= '0' & I_dataA(31 downto bit_vector2natural(signed(I_dataB(4 downto 0))));
+                                    s_result(31 downto 0) <= EXEC_SLL(I_dataA, bit_vector2natural(I_dataB(4 downto 0)));
+
+                                    -- s_result(31 downto 0) <= '0' & I_dataA(31 downto bit_vector2natural(signed(I_dataB(4 downto 0))));
 --s_result(31 downto 0) <= X"DEADBEEF";
                                 when others =>
                                     s_result <= X"00000000" & X"CDC1FEF1";

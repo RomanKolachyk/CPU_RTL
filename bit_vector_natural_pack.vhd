@@ -1,5 +1,4 @@
 library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
 --use IEEE.NUMERIC_STD.ALL;
 use IEEE.numeric_bit.all;   
 
@@ -31,42 +30,42 @@ package bit_vector_natural_pack is
     function sign_extend16(constant imm: Imm16Type) return bit_vector;    
     function sign_extend20(constant imm: Imm20Type) return bit_vector;    
     
-    procedure EXEC_SLL (
+    function EXEC_SLL (
         constant A : in DataType;
-        variable R : out DataType);
+        constant N : in natural) return DataType;
 
-    procedure EXEC_SRL (
+    function EXEC_SRL (
         constant A : in DataType;
-        variable R : out DataType); 
+        constant N : in natural) return DataType; 
 
-    procedure EXEC_SRA (
+    function EXEC_SRA (
         constant A : in DataType;
-        variable R : out DataType);
+        constant N : in natural) return DataType;
 
 end bit_vector_natural_pack;
     
 package body bit_vector_natural_pack is
 
-    procedure EXEC_SLL (
+    function EXEC_SLL (
             constant A : in DataType;
-            variable R : out DataType) is
+            constant N : in natural) return DataType is
         begin
-            R := A(A'left-1 downto 0) & '0';
-        end EXEC_SLL;
+            return bit_vector(shift_left(unsigned(A), N));
+    end EXEC_SLL;
 
-    procedure EXEC_SRL (
+    function EXEC_SRL (
             constant A : in DataType;
-            variable R : out DataType) is
+            constant N : in natural) return DataType is
         begin
-            R := '0' & A(A'left downto 1);        
-        end EXEC_SRL;
+            return bit_vector(shift_right(unsigned(A), N));        
+    end EXEC_SRL;
 
-    procedure EXEC_SRA (
+    function EXEC_SRA (
             constant A : in DataType;
-            variable R : out DataType) is
+            constant N : in natural) return DataType is
         begin
-            R := A(A'left) & A(A'left downto 1);
-        end EXEC_SRA;
+            return bit_vector(shift_right(signed(A), N));
+    end EXEC_SRA;
 
     function bit_vector2natural(constant A: bit_vector)
         return integer is

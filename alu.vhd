@@ -84,15 +84,15 @@ begin
                                 end if;
 
                             when F3_OPIMM_SLLI =>
---                                s_result(31 downto 0) <= bit_vector(shift_left(unsigned(I_dataA), bit_vector2natural(I_dataIMM(4 downto 0))));
-                                s_result(31 downto 0) <= X"DEADBEEF";
+                                s_result(31 downto 0) <= I_dataA & bit_vector(bit_vector2natural(I_dataIMM(4 downto 0)) downto 0);
+--                                s_result(31 downto 0) <= X"DEADBEEF";
                             when F3_OPIMM_SRLI =>
                                 case I_aluFunc(9 downto 3) is
                                     when F7_OPIMM_SRLI =>
---                                        s_result(31 downto 0) <= to_integer(shift_right(unsigned(I_dataA), to_integer(bit_vector2natural(I_dataIMM(4 downto 0)))), 32);
-s_result(31 downto 0) <= X"DEADBEEF";
+                                        s_result(31 downto 0) <= bit_vector(bit_vector2natural(unsigned(I_dataIMM(4 downto 0)) downto 0)) & I_dataA;
+--s_result(31 downto 0) <= X"DEADBEEF";
                                     when F7_OPIMM_SRAI =>
---                                        s_result(31 downto 0) <= to_integer(shift_right(signed(I_dataA), to_integer(bit_vector2natural(I_dataIMM(4 downto 0)))), 32);
+                                        s_result(31 downto 0) <= bit_vector(bit_vector2natural(signed(I_dataIMM(4 downto 0)) downto 0)) & I_dataA;
 s_result(31 downto 0) <= X"DEADBEEF";
                                     when others =>
                                 end case;

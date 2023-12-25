@@ -26,15 +26,10 @@ entity alu is
 end alu;
 
 architecture Behavioral of alu is
-    -- The internal register for results of operations. 
-    -- 32 bit + carry/overflow
     signal s_aluFunc : bit_vector (15 downto 0) := (others => '0');
     signal s_branchTarget : DataType := (others => '0');
 
     signal s_result : bit_vector(63 downto 0) := (others => '0');
-    -- signal s_resultms : bit_vector(63 downto 0) := (others => '0');
-    -- signal s_resultmu : bit_vector(63 downto 0) := (others => '0');
-    -- signal s_resultmsu : bit_vector(65 downto 0) := (others => '0'); -- result has 66 bits to accomodate mulhsu with it's additional-bit-fakery
     signal s_shouldBranch : bit := '0';
     signal s_lastPC : DataType := (others => '0');
     signal s_wait : bit := '0';
@@ -85,19 +80,12 @@ begin
 
                             when F3_OPIMM_SLLI =>
                             s_result(31 downto 0) <= EXEC_SLL(I_dataA, bit_vector2natural(I_dataIMM(4 downto 0)));
-
-                            -- s_result(31 downto 0) <= I_dataA(31 - bit_vector2natural(I_dataIMM(4 downto 0)) downto 0) & '0';
---                                s_result(31 downto 0) <= X"DEADBEEF";
                             when F3_OPIMM_SRLI =>
                                 case I_aluFunc(9 downto 3) is
                                     when F7_OPIMM_SRLI =>
                                     s_result(31 downto 0) <= EXEC_SRL(I_dataA, bit_vector2natural(I_dataIMM(4 downto 0)));   
-                                    -- s_result(31 downto 0) <= '0' & I_dataA(31 downto bit_vector2natural(unsigned(I_dataIMM(4 downto 0))));
---s_result(31 downto 0) <= X"DEADBEEF";
                                     when F7_OPIMM_SRAI =>
                                     s_result(31 downto 0) <= EXEC_SRA(I_dataA, bit_vector2natural(I_dataIMM(4 downto 0)));   
-                                        -- s_result(31 downto 0) <= '0' & I_dataA(31 downto bit_vector2natural(signed(I_dataIMM(4 downto 0))));
---s_result(31 downto 0) <= X"DEADBEEF";
                                     when others =>
                                 end case;
                             when others =>
@@ -136,18 +124,11 @@ begin
                                     s_result(31 downto 0) <= I_dataA and I_dataB;
 
                                 when F7_OP_SLL & F3_OP_SLL =>
-                                    -- s_result(31 downto 0) <= I_dataA(31 - bit_vector2natural(I_dataB(4 downto 0)) downto 0) & '0';
                                     s_result(31 downto 0) <= EXEC_SLL(I_dataA, bit_vector2natural(I_dataB(4 downto 0)));
---s_result(31 downto 0) <= X"DEADBEEF";
                                 when F7_OP_SRL & F3_OP_SRL =>
                                     s_result(31 downto 0) <= EXEC_SRL(I_dataA, bit_vector2natural(I_dataB(4 downto 0)));
-                                -- s_result(31 downto 0) <= '0' & I_dataA(31 downto bit_vector2natural(unsigned(I_dataB(4 downto 0))));
---s_result(31 downto 0) <= X"DEADBEEF";
                                 when F7_OP_SRA & F3_OP_SRA =>
                                     s_result(31 downto 0) <= EXEC_SLL(I_dataA, bit_vector2natural(I_dataB(4 downto 0)));
-
-                                    -- s_result(31 downto 0) <= '0' & I_dataA(31 downto bit_vector2natural(signed(I_dataB(4 downto 0))));
---s_result(31 downto 0) <= X"DEADBEEF";
                                 when others =>
                                     s_result <= X"00000000" & X"CDC1FEF1";
                             end case;

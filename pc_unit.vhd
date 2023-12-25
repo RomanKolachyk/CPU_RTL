@@ -20,11 +20,11 @@ begin
 
 	process (I_clk)
 	begin
-		if CLK = '1' and CLK'event then
+		if I_CLK = '1' and I_CLK'event then
 			case I_nPCop is
 				when PCU_OP_NOP => 	-- NOP, keep PC the same/halt
 				when PCU_OP_INC => 	-- increment
-					current_pc <= bit_vector(unsigned(current_pc) + 4); -- 32bit byte addressing
+					current_pc <= natural2bit_vector(bit_vector2natural(current_pc) + 4, 32); -- 32bit byte addressing
 				when PCU_OP_ASSIGN => 	-- set from external input
 					current_pc <= I_nPC;
 				when PCU_OP_RESET => 	-- Reset

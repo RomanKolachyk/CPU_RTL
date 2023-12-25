@@ -28,8 +28,7 @@ entity core is
 end core;
 
 architecture Behav of core is 
-    -- TODO PC_UNIT
-    component pc_unit
+    component PC
         port (
             I_clk : in  bit;
             I_nPC : in  DataType;
@@ -43,7 +42,10 @@ architecture Behav of core is
             RST : in bit;
     
             OP : in OpType6;
-    
+            I_ready : in bit;
+            O_execute : out bit;
+            I_dataReady : in bit;
+
             ALU_Wait : in bit;
             ALU_MultiCy : in bit;
             OUT_STATE : out bit_vector(6 downto 0));
@@ -125,7 +127,7 @@ architecture Behav of core is
     signal state: bit_vector(6 downto 0) := (others => '0');
     signal pcop: bit_vector(1 downto 0);
     signal in_pc: AddrType;
-    signal PC : AddrType := (others => '0');
+    signal s_PC : AddrType := (others => '0');
 
     signal aluFunc: bit_vector(15 downto 0);
     signal memOp: OpType4;
@@ -207,17 +209,20 @@ begin
         MEM_I_dataReady => MEM_I_dataReady
     );
 
-    pc_unit_instance : pc_unit port map(
+    pc_unit_instance : PC port map(
         I_clk => core_clock, 
         I_nPC => in_pc,
         I_nPCop => pcop,
-        O_PC => PC
+        O_PC => s_PC
     );
 
     controller_instance : controller port map(
         CLK => core_clock,
         RST => RST,
         OP => aluop,
+        I_ready => memctl_ready,
+        O_execute => memctl_execute,
+        I_dataReady => memctl_dataReady,
         ALU_Wait => ALU_WAIT,
         ALU_MultiCy => alutobemulticycle,
         OUT_STATE => state
@@ -246,7 +251,7 @@ begin
         I_dataDwe => dataDwe,
         I_aluop => aluop(6 downto 2),
         I_aluFunc => alufunc,
-        I_PC => pc,
+        I_PC => s_pc,
         I_dataIMM => dataImm,
         -- I_clear => misalign_int,
         O_dataResult => dataResult,
@@ -273,7 +278,7 @@ begin
     begin
         if core_clock = '1' and core_clock'event then
             if en_decode = '1' then
-                lastPC_dec <= PC;
+                lastPC_dec <= s_PC;
             end if;
             if state(0) = '1' then
                 instruction <= memctl_out_data;
@@ -283,26 +288,22 @@ begin
 
     -- Register file controls
     reg_en <= en_decode or en_regwrite;
-    reg_we <= dataWriteReg and en_regwrite;-- and not misalign_mem_hint;
+    reg_we <= dataWriteReg and en_regwrite;
 
-    -- These are the pipeline stage enable bits
     en_fetch <= state(0);
     en_decode <= state(1);
     en_alu <= state(2);
-    -- en_csru <= state(3) when (aluop(6 downto 2) = OPCODE_SYSTEM and aluFunc(2 downto 0) /= "000") else '0';
     en_memory <= state(3);
     en_regwrite <= state(4);
-    -- en_stall <= state(6);
 
     -- This decides what the next PC should be
-    pcop <= PCU_OP_INC when RST = '1' else
-        PCU_OP_INC when shouldBranch = '1' and state(4) = '1' else
+    pcop <= PCU_OP_RESET when RST = '1' else
+        PCU_OP_ASSIGN when shouldBranch = '1' and state(4) = '1' else
         PCU_OP_INC when shouldBranch = '0' and state(4) = '1' else
-        -- PCU_OP_ASSIGN when PCintvec = '1' else
-        PCU_OP_INC;
+        PCU_OP_NOP;
 
     -- Below statements are for memory interface use.
-    memctl_address <= dataResult when en_memory = '1' else PC;
+    memctl_address <= dataResult when en_memory = '1' else s_PC;
     ram_req_size <= memMode when en_memory = '1' else '0';
     memctl_dataByteEn <= memctl_size when en_memory = '1' else F2_MEM_LS_SIZE_W;
     memctl_in_data <= dataB;
@@ -310,7 +311,6 @@ begin
     memctl_size <= memOp(1 downto 0);
     memctl_signExtend <= not memOp(2);
 
-    -- This chooses to write registers with memory data or ALU/csr data
     registerWriteData <= memctl_out_data when memOp(4 downto 3) = "10" else dataB when (aluop(6 downto 2) = OPCODE_STORE) else dataResult;
 
     

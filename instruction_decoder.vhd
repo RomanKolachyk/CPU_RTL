@@ -151,8 +151,6 @@ begin
                         O_regDwe <= '0';
                         O_dataIMM <= I_dataInst(IMM_I_START downto IMM_S_B_END) & "0000000";
                 end case;
-            -- elsif I_int_ack = '1' then
-                -- s_int <= '0';
             end if;
         end if;
     end process;

@@ -9,9 +9,12 @@ entity controller is
         CLK : in bit;
         RST : in bit;
 
-        --D_IN : in DataType;
         OP : in OpType6;
         --D_OUT : out DataType;
+
+        I_ready : in bit;
+        O_execute : out bit;
+        I_dataReady : in bit;
 
         ALU_Wait : in bit;
         ALU_MultiCy : in bit;
@@ -29,6 +32,11 @@ architecture Behav of controller is
     signal mem_cycles : integer := 0;
     signal has_waited : bit := '0';
 begin
+
+    O_execute <= mem_execute;
+    mem_ready <= I_ready;
+    mem_dataReady <= I_dataReady;
+
     process(CLK)
     begin
         if CLK = '1' and CLK'event then

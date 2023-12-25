@@ -175,7 +175,7 @@ begin
     core_clock <= CLK;
 
     mem_controller_instance : mem_controller port map(
-        CLK => CLK,
+        CLK => core_clock,
         RST => RST,
         OUT_READY => memctl_ready,
         EXECUTE => memctl_execute,
